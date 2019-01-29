@@ -35,8 +35,10 @@ searches <- tibble(dogs) %>%
   crossing(signs) %>%
   mutate(
     search = str_glue("{dogs} {signs}"),
-    search = str_squish(search)
-  )
+    search = str_squish(search)) %>%
+  group_by(row_number()) %>%
+  mutate(search = list(c(search, "dog breed"))) %>%
+  ungroup
 
 head(searches)
 ```
@@ -90,8 +92,7 @@ iot <- searches %>%
   unnest(iot) %>% 
   right_join(searches %>% select_if(~!is_list(.)))
 
-ggplot(iot) +
-  aes(date, hits, colour = search) +
+ggplot(iot) + aes(date, hits, colour = search) +
   geom_line() +
   facet_wrap(~search) +
   theme(legend.position = "none")
