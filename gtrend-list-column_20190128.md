@@ -7,14 +7,14 @@ Ian Handel
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ──────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
 
     ## ✔ ggplot2 3.1.0           ✔ purrr   0.2.5      
     ## ✔ tibble  2.0.99.9000     ✔ dplyr   0.7.8      
     ## ✔ tidyr   0.8.2           ✔ stringr 1.3.1      
     ## ✔ readr   1.3.1           ✔ forcats 0.3.0
 
-    ## ── Conflicts ───────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ─────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
@@ -33,6 +33,8 @@ library(lubridate) # for now()
 
 ### Build search table
 
+try adding multi-term searches
+
 ``` r
 # The signs to search for
 signs <- c(
@@ -49,25 +51,25 @@ dogs <- c(
 )
 
 # All combinations of above (remove leading/trailing spaces)
+
 searches <- tibble(dogs) %>%
   crossing(signs) %>%
   mutate(
     search = str_glue("{dogs} {signs}"),
     search = str_squish(search)
-  )
+  ) %>% 
+  group_by(dogs) %>%
+  summarise(search = list(search)) %>% 
+  ungroup()
 
 head(searches)
 ```
 
-    ## # A tibble: 6 x 3
-    ##   dogs  signs                search                    
-    ##   <chr> <chr>                <chr>                     
-    ## 1 puppy ""                   puppy                     
-    ## 2 puppy base-jumping-on-acid puppy base-jumping-on-acid
-    ## 3 puppy diarrhoea            puppy diarrhoea           
-    ## 4 puppy ill                  puppy ill                 
-    ## 5 dog   ""                   dog                       
-    ## 6 dog   base-jumping-on-acid dog base-jumping-on-acid
+    ## # A tibble: 2 x 2
+    ##   dogs  search   
+    ##   <chr> <list>   
+    ## 1 dog   <chr [4]>
+    ## 2 puppy <chr [4]>
 
 ### For each search do a gtrends call
 
@@ -81,15 +83,11 @@ searches <- searches %>%
 head(searches)
 ```
 
-    ## # A tibble: 6 x 4
-    ##   dogs  signs                search                     gtrend       
-    ##   <chr> <chr>                <chr>                      <list>       
-    ## 1 puppy ""                   puppy                      <S3: gtrends>
-    ## 2 puppy base-jumping-on-acid puppy base-jumping-on-acid <S3: gtrends>
-    ## 3 puppy diarrhoea            puppy diarrhoea            <S3: gtrends>
-    ## 4 puppy ill                  puppy ill                  <S3: gtrends>
-    ## 5 dog   ""                   dog                        <S3: gtrends>
-    ## 6 dog   base-jumping-on-acid dog base-jumping-on-acid   <S3: gtrends>
+    ## # A tibble: 2 x 3
+    ##   dogs  search    gtrend       
+    ##   <chr> <list>    <list>       
+    ## 1 dog   <chr [4]> <S3: gtrends>
+    ## 2 puppy <chr [4]> <S3: gtrends>
 
 ### Extract some dataframes into their own columns
 
@@ -104,15 +102,11 @@ searches <- searches %>%
 head(searches)
 ```
 
-    ## # A tibble: 6 x 7
-    ##   dogs  signs       search        gtrend   iot        ibr        rt        
-    ##   <chr> <chr>       <chr>         <list>   <list>     <list>     <list>    
-    ## 1 puppy ""          puppy         <S3: gt… <data.fra… <data.fra… <data.fra…
-    ## 2 puppy base-jumpi… puppy base-j… <S3: gt… <NULL>     <data.fra… <NULL>    
-    ## 3 puppy diarrhoea   puppy diarrh… <S3: gt… <data.fra… <data.fra… <data.fra…
-    ## 4 puppy ill         puppy ill     <S3: gt… <data.fra… <data.fra… <data.fra…
-    ## 5 dog   ""          dog           <S3: gt… <data.fra… <data.fra… <data.fra…
-    ## 6 dog   base-jumpi… dog base-jum… <S3: gt… <NULL>     <data.fra… <NULL>
+    ## # A tibble: 2 x 6
+    ##   dogs  search    gtrend       iot                 ibr                rt   
+    ##   <chr> <list>    <list>       <list>              <list>             <lis>
+    ## 1 dog   <chr [4]> <S3: gtrend… <data.frame [340 ×… <data.frame [16 ×… <NUL…
+    ## 2 puppy <chr [4]> <S3: gtrend… <data.frame [340 ×… <data.frame [16 ×… <NUL…
 
 ### make a safe filename and save
 
@@ -134,19 +128,18 @@ uses `right_join(searches %>% select_if(~!is_list(.)))` to include null search i
 iot <- searches %>%
   filter(!map_lgl(iot, is.null)) %>% 
   unnest(iot) %>% 
-  right_join(searches %>% select_if(~!is_list(.)))
+  right_join(searches %>% select_if(~!is_list(.))) %>% 
+  mutate(hits = if_else(hits == "<1", 0, parse_number(hits)))
 ```
 
-    ## Joining, by = c("dogs", "signs", "search")
+    ## Joining, by = "dogs"
 
 ``` r
 ggplot(iot) +
-  aes(date, hits, colour = search) +
+  aes(date, hits, colour = keyword) +
   geom_line() +
-  facet_wrap(~search) +
+  facet_wrap(~keyword, scale = "free") +
   theme(legend.position = "none")
 ```
-
-    ## Warning: Removed 2 rows containing missing values (geom_path).
 
 ![](gtrend-list-column_20190128_files/figure-markdown_github/unnamed-chunk-6-1.png)

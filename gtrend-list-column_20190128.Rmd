@@ -15,6 +15,9 @@ library(lubridate) # for now()
 
 ### Build search table
 
+try adding multi-term searches
+
+
 ```{r}
 # The signs to search for
 signs <- c(
@@ -31,12 +34,16 @@ dogs <- c(
 )
 
 # All combinations of above (remove leading/trailing spaces)
+
 searches <- tibble(dogs) %>%
   crossing(signs) %>%
   mutate(
     search = str_glue("{dogs} {signs}"),
     search = str_squish(search)
-  )
+  ) %>% 
+  group_by(dogs) %>%
+  summarise(search = list(search)) %>% 
+  ungroup()
 
 head(searches)
 ```
@@ -84,15 +91,17 @@ uses [this solution](https://stackoverflow.com/questions/47224831/using-tidyr-un
 
 uses ```right_join(searches %>% select_if(~!is_list(.)))``` to include null search info
 
+
 ```{r}
 iot <- searches %>%
   filter(!map_lgl(iot, is.null)) %>% 
   unnest(iot) %>% 
-  right_join(searches %>% select_if(~!is_list(.)))
+  right_join(searches %>% select_if(~!is_list(.))) %>% 
+  mutate(hits = if_else(hits == "<1", 0, parse_number(hits)))
 
 ggplot(iot) +
-  aes(date, hits, colour = search) +
+  aes(date, hits, colour = keyword) +
   geom_line() +
-  facet_wrap(~search) +
+  facet_wrap(~keyword, scale = "free") +
   theme(legend.position = "none")
 ```
