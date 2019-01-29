@@ -21,8 +21,7 @@ signs <- c(
   "itch",
   "ill",
   "diarrhoea",
-  "vomiting",
-  "coughing"
+  "base-jumping-on-acid"
 )
 
 # The dog types to search for
@@ -81,8 +80,11 @@ write_rds(searches, rds_path)
 
 ### Unnest, say iot, then try a plot
 
+uses [this solution](https://stackoverflow.com/questions/47224831/using-tidyr-unnest-with-null-values) to deal with NULL dataframes
+
 ```{r}
 iot <- searches %>%
+  filter(!map_lgl(iot, is.null)) %>% 
   unnest(iot)
 
 ggplot(iot) +

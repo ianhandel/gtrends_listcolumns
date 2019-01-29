@@ -39,8 +39,7 @@ signs <- c(
   "",
   "ill",
   "diarrhoea",
-  "vomiting",
-  "coughing"
+  "base-jumping-on-acid"
 )
 
 # The dog types to search for
@@ -61,14 +60,14 @@ head(searches)
 ```
 
     ## # A tibble: 6 x 3
-    ##   dogs  signs     search         
-    ##   <chr> <chr>     <chr>          
-    ## 1 puppy ""        puppy          
-    ## 2 puppy coughing  puppy coughing 
-    ## 3 puppy diarrhoea puppy diarrhoea
-    ## 4 puppy ill       puppy ill      
-    ## 5 puppy vomiting  puppy vomiting 
-    ## 6 dog   ""        dog
+    ##   dogs  signs                search                    
+    ##   <chr> <chr>                <chr>                     
+    ## 1 puppy ""                   puppy                     
+    ## 2 puppy base-jumping-on-acid puppy base-jumping-on-acid
+    ## 3 puppy diarrhoea            puppy diarrhoea           
+    ## 4 puppy ill                  puppy ill                 
+    ## 5 dog   ""                   dog                       
+    ## 6 dog   base-jumping-on-acid dog base-jumping-on-acid
 
 ### For each search do a gtrends call
 
@@ -83,14 +82,14 @@ head(searches)
 ```
 
     ## # A tibble: 6 x 4
-    ##   dogs  signs     search          gtrend       
-    ##   <chr> <chr>     <chr>           <list>       
-    ## 1 puppy ""        puppy           <S3: gtrends>
-    ## 2 puppy coughing  puppy coughing  <S3: gtrends>
-    ## 3 puppy diarrhoea puppy diarrhoea <S3: gtrends>
-    ## 4 puppy ill       puppy ill       <S3: gtrends>
-    ## 5 puppy vomiting  puppy vomiting  <S3: gtrends>
-    ## 6 dog   ""        dog             <S3: gtrends>
+    ##   dogs  signs                search                     gtrend       
+    ##   <chr> <chr>                <chr>                      <list>       
+    ## 1 puppy ""                   puppy                      <S3: gtrends>
+    ## 2 puppy base-jumping-on-acid puppy base-jumping-on-acid <S3: gtrends>
+    ## 3 puppy diarrhoea            puppy diarrhoea            <S3: gtrends>
+    ## 4 puppy ill                  puppy ill                  <S3: gtrends>
+    ## 5 dog   ""                   dog                        <S3: gtrends>
+    ## 6 dog   base-jumping-on-acid dog base-jumping-on-acid   <S3: gtrends>
 
 ### Extract some dataframes into their own columns
 
@@ -106,14 +105,14 @@ head(searches)
 ```
 
     ## # A tibble: 6 x 7
-    ##   dogs  signs   search      gtrend    iot          ibr         rt          
-    ##   <chr> <chr>   <chr>       <list>    <list>       <list>      <list>      
-    ## 1 puppy ""      puppy       <S3: gtr… <data.frame… <data.fram… <data.frame…
-    ## 2 puppy coughi… puppy coug… <S3: gtr… <data.frame… <data.fram… <data.frame…
-    ## 3 puppy diarrh… puppy diar… <S3: gtr… <data.frame… <data.fram… <data.frame…
-    ## 4 puppy ill     puppy ill   <S3: gtr… <data.frame… <data.fram… <data.frame…
-    ## 5 puppy vomiti… puppy vomi… <S3: gtr… <data.frame… <data.fram… <data.frame…
-    ## 6 dog   ""      dog         <S3: gtr… <data.frame… <data.fram… <data.frame…
+    ##   dogs  signs       search        gtrend   iot        ibr        rt        
+    ##   <chr> <chr>       <chr>         <list>   <list>     <list>     <list>    
+    ## 1 puppy ""          puppy         <S3: gt… <data.fra… <data.fra… <data.fra…
+    ## 2 puppy base-jumpi… puppy base-j… <S3: gt… <NULL>     <data.fra… <NULL>    
+    ## 3 puppy diarrhoea   puppy diarrh… <S3: gt… <data.fra… <data.fra… <data.fra…
+    ## 4 puppy ill         puppy ill     <S3: gt… <data.fra… <data.fra… <data.fra…
+    ## 5 dog   ""          dog           <S3: gt… <data.fra… <data.fra… <data.fra…
+    ## 6 dog   base-jumpi… dog base-jum… <S3: gt… <NULL>     <data.fra… <NULL>
 
 ### make a safe filename and save
 
@@ -127,8 +126,11 @@ write_rds(searches, rds_path)
 
 ### Unnest, say iot, then try a plot
 
+uses [this solution](https://stackoverflow.com/questions/47224831/using-tidyr-unnest-with-null-values) to deal with NULL dataframes
+
 ``` r
 iot <- searches %>%
+  filter(!map_lgl(iot, is.null)) %>% 
   unnest(iot)
 
 ggplot(iot) +
