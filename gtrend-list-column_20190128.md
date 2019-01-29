@@ -7,14 +7,14 @@ Ian Handel
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ──────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## ── Attaching packages ───────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
 
     ## ✔ ggplot2 3.1.0           ✔ purrr   0.2.5      
     ## ✔ tibble  2.0.99.9000     ✔ dplyr   0.7.8      
     ## ✔ tidyr   0.8.2           ✔ stringr 1.3.1      
     ## ✔ readr   1.3.1           ✔ forcats 0.3.0
 
-    ## ── Conflicts ─────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ── Conflicts ──────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
@@ -129,17 +129,31 @@ iot <- searches %>%
   filter(!map_lgl(iot, is.null)) %>% 
   unnest(iot) %>% 
   right_join(searches %>% select_if(~!is_list(.))) %>% 
-  mutate(hits = if_else(hits == "<1", 0, parse_number(hits)))
+  mutate(hits = case_when(hits == "<1" ~ 0L,
+                          hits == 0    ~ NA_integer_,
+                          TRUE         ~ parse_integer(hits)))
 ```
 
     ## Joining, by = "dogs"
+
+    ## Warning: 325 parsing failures.
+    ## row col   expected actual
+    ## 171  -- an integer     <1
+    ## 172  -- an integer     <1
+    ## 173  -- an integer     <1
+    ## 174  -- an integer     <1
+    ## 175  -- an integer     <1
+    ## ... ... .......... ......
+    ## See problems(...) for more details.
 
 ``` r
 ggplot(iot) +
   aes(date, hits, colour = keyword) +
   geom_line() +
-  facet_wrap(~keyword, scale = "free") +
+  facet_wrap(~ str_wrap(keyword,width = 20)) +
   theme(legend.position = "none")
 ```
+
+    ## Warning: Removed 170 rows containing missing values (geom_path).
 
 ![](gtrend-list-column_20190128_files/figure-markdown_github/unnamed-chunk-6-1.png)

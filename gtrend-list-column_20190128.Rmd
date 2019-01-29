@@ -97,11 +97,13 @@ iot <- searches %>%
   filter(!map_lgl(iot, is.null)) %>% 
   unnest(iot) %>% 
   right_join(searches %>% select_if(~!is_list(.))) %>% 
-  mutate(hits = if_else(hits == "<1", 0, parse_number(hits)))
+  mutate(hits = case_when(hits == "<1" ~ 0L,
+                          hits == 0    ~ NA_integer_,
+                          TRUE         ~ parse_integer(hits)))
 
 ggplot(iot) +
   aes(date, hits, colour = keyword) +
   geom_line() +
-  facet_wrap(~keyword, scale = "free") +
+  facet_wrap(~ str_wrap(keyword,width = 20)) +
   theme(legend.position = "none")
 ```
