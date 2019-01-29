@@ -18,7 +18,7 @@ library(lubridate) # for now()
 ```{r}
 # The signs to search for
 signs <- c(
-  "",
+  "itch",
   "ill",
   "diarrhoea",
   "vomiting",
@@ -27,7 +27,7 @@ signs <- c(
 
 # The dog types to search for
 dogs <- c(
-  "puppy",
+  "puppies",
   "dog"
 )
 
