@@ -56,7 +56,19 @@ searches <- tibble(dogs) %>%
     search = str_glue("{dogs} {signs}"),
     search = str_squish(search)
   )
+
+head(searches)
 ```
+
+    ## # A tibble: 6 x 3
+    ##   dogs  signs     search         
+    ##   <chr> <chr>     <chr>          
+    ## 1 puppy ""        puppy          
+    ## 2 puppy coughing  puppy coughing 
+    ## 3 puppy diarrhoea puppy diarrhoea
+    ## 4 puppy ill       puppy ill      
+    ## 5 puppy vomiting  puppy vomiting 
+    ## 6 dog   ""        dog
 
 ### For each search do a gtrends call
 
@@ -66,7 +78,19 @@ searches <- searches %>%
     geo = "GB",
     time = "2011-01-01 2018-01-01"
   ))
+
+head(searches)
 ```
+
+    ## # A tibble: 6 x 4
+    ##   dogs  signs     search          gtrend       
+    ##   <chr> <chr>     <chr>           <list>       
+    ## 1 puppy ""        puppy           <S3: gtrends>
+    ## 2 puppy coughing  puppy coughing  <S3: gtrends>
+    ## 3 puppy diarrhoea puppy diarrhoea <S3: gtrends>
+    ## 4 puppy ill       puppy ill       <S3: gtrends>
+    ## 5 puppy vomiting  puppy vomiting  <S3: gtrends>
+    ## 6 dog   ""        dog             <S3: gtrends>
 
 ### Extract some dataframes into their own columns
 
@@ -77,7 +101,19 @@ searches <- searches %>%
     ibr = map(gtrend, "interest_by_region"),
     rt = map(gtrend, "related_topics")
   )
+
+head(searches)
 ```
+
+    ## # A tibble: 6 x 7
+    ##   dogs  signs   search      gtrend    iot          ibr         rt          
+    ##   <chr> <chr>   <chr>       <list>    <list>       <list>      <list>      
+    ## 1 puppy ""      puppy       <S3: gtr… <data.frame… <data.fram… <data.frame…
+    ## 2 puppy coughi… puppy coug… <S3: gtr… <data.frame… <data.fram… <data.frame…
+    ## 3 puppy diarrh… puppy diar… <S3: gtr… <data.frame… <data.fram… <data.frame…
+    ## 4 puppy ill     puppy ill   <S3: gtr… <data.frame… <data.fram… <data.frame…
+    ## 5 puppy vomiti… puppy vomi… <S3: gtr… <data.frame… <data.fram… <data.frame…
+    ## 6 dog   ""      dog         <S3: gtr… <data.frame… <data.fram… <data.frame…
 
 ### make a safe filename and save
 

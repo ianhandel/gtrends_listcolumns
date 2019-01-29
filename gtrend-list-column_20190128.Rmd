@@ -38,6 +38,8 @@ searches <- tibble(dogs) %>%
     search = str_glue("{dogs} {signs}"),
     search = str_squish(search)
   )
+
+head(searches)
 ```
 
 
@@ -49,6 +51,8 @@ searches <- searches %>%
     geo = "GB",
     time = "2011-01-01 2018-01-01"
   ))
+
+head(searches)
 ```
 
 ### Extract some dataframes into their own columns
@@ -60,6 +64,8 @@ searches <- searches %>%
     ibr = map(gtrend, "interest_by_region"),
     rt = map(gtrend, "related_topics")
   )
+
+head(searches)
 ```
 
 ### make a safe filename and save
