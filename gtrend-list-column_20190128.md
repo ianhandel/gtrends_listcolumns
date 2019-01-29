@@ -128,16 +128,25 @@ write_rds(searches, rds_path)
 
 uses [this solution](https://stackoverflow.com/questions/47224831/using-tidyr-unnest-with-null-values) to deal with NULL dataframes
 
+uses `right_join(searches %>% select_if(~!is_list(.)))` to include null search info
+
 ``` r
 iot <- searches %>%
   filter(!map_lgl(iot, is.null)) %>% 
-  unnest(iot)
+  unnest(iot) %>% 
+  right_join(searches %>% select_if(~!is_list(.)))
+```
 
+    ## Joining, by = c("dogs", "signs", "search")
+
+``` r
 ggplot(iot) +
   aes(date, hits, colour = search) +
   geom_line() +
   facet_wrap(~search) +
   theme(legend.position = "none")
 ```
+
+    ## Warning: Removed 2 rows containing missing values (geom_path).
 
 ![](gtrend-list-column_20190128_files/figure-markdown_github/unnamed-chunk-6-1.png)
