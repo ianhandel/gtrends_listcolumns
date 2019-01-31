@@ -18,8 +18,6 @@ library(lubridate) # for now()
 ```{r}
 # The signs to search for
 signs <- c(
-  "itch",
-  "ill",
   "diarrhoea",
   "base-jumping-on-acid"
 )
@@ -37,7 +35,7 @@ searches <- tibble(dogs) %>%
     search = str_glue("{dogs} {signs}"),
     search = str_squish(search)) %>%
   group_by(row_number()) %>%
-  mutate(search = list(c(search, "dog breed"))) %>%
+  mutate(search = list(c(search, "listsarefun"))) %>%
   ungroup
 
 head(searches)
@@ -53,6 +51,8 @@ searches <- searches %>%
     time = "2011-01-01 2018-01-01"
   ))
 
+
+
 head(searches)
 ```
 
@@ -63,8 +63,10 @@ searches <- searches %>%
   mutate(
     iot = map(gtrend, "interest_over_time"),
     ibr = map(gtrend, "interest_by_region"),
-    rt = map(gtrend, "related_topics")
-  )
+    rq = map(gtrend, "related_queries")) %>%
+  mutate(iot = map(iot, ~mutate_all(.x, as.character)))
+
+#BROKEN HERE
 
 head(searches)
 ```
