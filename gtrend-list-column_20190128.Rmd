@@ -29,14 +29,14 @@ dogs <- c(
 )
 
 # All combinations of above (remove leading/trailing spaces)
-searches <- tibble(dogs) %>%
+searches2 <- tibble(dogs) %>%
   crossing(signs) %>%
   mutate(
     search = str_glue("{dogs} {signs}"),
     search = str_squish(search)) %>%
   mutate(search = map(search, ~list(.x, "listsarefun")))
 
-searches2 <- tibble(dogs) %>%
+searches <- tibble(dogs) %>%
   crossing(signs) %>%
   mutate(
     search = str_glue("{dogs} {signs}"),
