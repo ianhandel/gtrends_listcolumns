@@ -34,7 +34,19 @@ searches <- tibble(dogs) %>%
   mutate(
     search = str_glue("{dogs} {signs}"),
     search = str_squish(search)) %>%
-  mutate(search = list(c(search, "listsarefun")))
+  mutate(search = map(search, ~list(.x, "listsarefun")))
+
+searches2 <- tibble(dogs) %>%
+  crossing(signs) %>%
+  mutate(
+    search = str_glue("{dogs} {signs}"),
+    search = str_squish(search)) %>%
+  group_by(row_number()) %>% 
+  mutate(search = map(search, ~list(.x, "listsarefun"))) %>% 
+  ungroup() %>% 
+  select(-`row_number()`)
+
+identical(searches, searches2)
 
 head(searches)
 ```
