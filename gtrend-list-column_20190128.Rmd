@@ -62,7 +62,7 @@ searches <- searches %>%
     iot = map(gtrend, "interest_over_time"),
     ibr = map(gtrend, "interest_by_region"),
     rq = map(gtrend, "related_queries")) %>%
-  mutate(iot = map(iot, ~mutate_all(.x, as.character)))
+  mutate(iot = map_if(iot, ~!is.null(.), ~mutate_all(.x, as.character)))
 
 #BROKEN HERE
 
@@ -90,10 +90,12 @@ uses ```right_join(searches %>% select_if(~!is_list(.)))``` to include null sear
 iot <- searches %>%
   filter(!map_lgl(iot, is.null)) %>% 
   unnest(iot) %>% 
-  right_join(searches %>% select_if(~!is_list(.)))
+  right_join(searches %>% select_if(~!is_list(.))) %>% 
+  mutate(date = anytime::anytime(date),
+         hits = parse_number(hits))
 
-ggplot(iot) + aes(date, hits, colour = search) +
+ggplot(iot) + aes(date, hits, colour = keyword) +
   geom_line() +
-  facet_wrap(~search) +
+  facet_wrap(~keyword) +
   theme(legend.position = "none")
 ```
